@@ -10,8 +10,9 @@ from math import cos, sin, asin, tan, atan2
 # msgs and srv for working with the set_model_service
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
-from matplotlib import  pyplot as plt
+from matplotlib import pyplot as plt
 from std_srvs.srv import Empty
+import cv2
 
 # a handy tool to convert orientations
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
@@ -85,9 +86,14 @@ class BasicThymio:
         # data_msg = rospy.wait_for_message('/camera/image_raw', Image)
         # format_msg = rospy.wait_for_message('camera/camera_info', sensor_msgs.msg.CameraInfo)
         # print(img)
-        pixels = np.fromstring(img.data, dtype=np.dtype(np.uint8)).reshape(480, 640, 3)
-        plt.imshow(pixels)
-        plt.show()
+        pixels = np.fromstring(img.data, dtype=np.dtype(
+            np.uint8)).reshape(480, 640, 3)
+        cv2.imshow("Image", pixels)
+        if cv2.waitKey(1) == 27:  # esc to quit
+            cv2.destroyAllWindows()
+            sys.exit(1)
+
+        # plt.draw()
 
     def spin_8(self):
         """Moves the migthy thymio"""
@@ -128,5 +134,7 @@ if __name__ == '__main__':
 
     #thymio.thymio_state_service_request([0.,0.,0.], [0.,0.,0.])
     # rospy.sleep(1.)
-
+    # plt.ion()
+    # plt.show()
+    # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     thymio.spin_8()
