@@ -5,10 +5,12 @@ import sys
 import numpy as np
 from geometry_msgs.msg import Pose, Twist
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Image
 from math import cos, sin, asin, tan, atan2
 # msgs and srv for working with the set_model_service
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
+from matplotlib import  pyplot as plt
 from std_srvs.srv import Empty
 
 # a handy tool to convert orientations
@@ -30,6 +32,9 @@ class BasicThymio:
         # when a message of type Pose is received.
         self.pose_subscriber = rospy.Subscriber(self.thymio_name + '/odom',
                                                 Odometry, self.update_state)
+
+        self.pose_subscriber = rospy.Subscriber(self.thymio_name + '/camera/image_raw',
+                                                Image, self.update_image)
 
         self.current_pose = Pose()
         self.current_twist = Twist()
@@ -72,8 +77,17 @@ class BasicThymio:
             self.current_pose.orientation.z,
             self.current_pose.orientation.w)
         (roll, pitch, yaw) = euler_from_quaternion(quat)
-        rospy.loginfo("State from Odom: (%.5f, %.5f, %.5f) " % (
-            self.current_pose.position.x, self.current_pose.position.y, yaw))
+        # rospy.loginfo("State from Odom: (%.5f, %.5f, %.5f) " % (
+        #     self.current_pose.position.x, self.current_pose.position.y, yaw))
+
+    def update_image(self, img):
+        """A new Odometry message has arrived. See Odometry msg definition."""
+        # data_msg = rospy.wait_for_message('/camera/image_raw', Image)
+        # format_msg = rospy.wait_for_message('camera/camera_info', sensor_msgs.msg.CameraInfo)
+        # print(img)
+        pixels = np.fromstring(img.data, dtype=np.dtype(np.uint8)).reshape(480, 640, 3)
+        plt.imshow(pixels)
+        plt.show()
 
     def spin_8(self):
         """Moves the migthy thymio"""
