@@ -7,7 +7,7 @@
     </include>
     <!-- A ground plane -->
     <include>
-      <uri>model://ground_plane</uri>
+      <uri>model://color_plane</uri>
     </include>
   </world>
 </sdf>

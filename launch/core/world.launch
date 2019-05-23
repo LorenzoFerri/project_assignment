@@ -6,7 +6,6 @@
   <arg name="extra_gazebo_args" default=""/>
   <arg name="gui" default="true"/>
   <arg name="recording" default="false"/>
-  <arg name="world" default="empty"/>
   <!-- Note that 'headless' is currently non-functional.  See gazebo_ros_pkgs issue #491 (-r arg does not disable
        rendering, but instead enables recording). The arg definition has been left here to prevent breaking downstream
        launch files, but it does nothing. -->
@@ -14,14 +13,13 @@
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
-  <!--arg name="world_name" default="worlds/empty.world"/--> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+  <arg name="world_name" default="$(find pioneer3at_simulation)/launch/worlds/empty.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
   <arg name="respawn_gazebo" default="false"/>
   <arg name="use_clock_frequency" default="false"/>
   <arg name="pub_clock_frequency" default="100"/>
 
   <!-- set use_sim_time flag -->
   <param name="/use_sim_time" value="$(arg use_sim_time)"/>
-  <arg name="world_name" default="$(find project_assignment)/launch/worlds/$(arg world).world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
 
   <!-- set command arguments -->
   <arg unless="$(arg paused)" name="command_arg1" value=""/>

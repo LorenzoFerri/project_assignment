@@ -1,0 +1,53 @@
+<launch>
+	<env name="GAZEBO_MODEL_PATH" value="$GAZEBO_MODEL_PATH:$(find pioneer3at_simulation)/models" />
+  <env name="GAZEBO_RESOURCE_PATH" value="$GAZEBO_RESOURCE_PATH:$(find pioneer3at_simulation)/models" />
+
+  <arg name="name" default="pioneer3at"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+	<arg name="verbose" default="true"/>
+
+  <arg name="world_name" default="empty"/>
+
+	<arg name="world" default="$(find pioneer3at_simulation)/launch/worlds/$(arg world_name).world" />
+
+	<arg name="x" default="0"/>
+  <arg name="y" default="0"/>
+  <arg name="z" default="0.4"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+
+
+  <arg name="model" default="$(find pioneer3at_simulation)/urdf/pioneer3at.urdf.xacro"/>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
+
+	<!-- set command arguments -->
+  <arg unless="$(arg paused)" name="command_arg1" value=""/>
+  <arg     if="$(arg paused)" name="command_arg1" value="-u"/>
+  <arg unless="$(arg headless)" name="command_arg2" value=""/>
+  <arg     if="$(arg headless)" name="command_arg2" value="-r"/>
+  <arg unless="$(arg verbose)" name="command_arg3" value=""/>
+  <arg     if="$(arg verbose)" name="command_arg3" value="--verbose"/>
+  <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
+  <arg     if="$(arg debug)" name="script_type" value="debug"/>
+
+  <!-- start gazebo server-->
+  <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="false" output="screen"
+	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) $(arg world)" />
+
+	<!-- start gazebo client -->
+  <group if="$(arg gui)">
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
+  </group>
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"	args="-x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -urdf -model $(arg name) -param robot_description" />
+
+  <!-- robot_state publisher -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+</launch>

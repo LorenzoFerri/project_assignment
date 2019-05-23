@@ -1,0 +1,10 @@
+<launch>
+
+  <arg name="world_name" default="empty"/>
+
+	<include file="$(find pioneer3at_simulation)/launch/core/gazebo_simple.launch">
+      <arg name="world_name" value="$(arg world_name)"/>
+	</include>
+
+
+</launch>

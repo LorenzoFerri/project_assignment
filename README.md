@@ -1,10 +1,10 @@
 ## Skeleton files to bring up gazebo and the Mighty Thymio model
 
-Add the `thymio_course_skeleton` package to your `your_catkin_workspace`:
+Add the `project_assignment` package to your `your_catkin_workspace`:
 
 ```
 cd <your_catkin_workspace>/src
-git clone https://github.com/romarcg/thymio_course_skeleton.git
+git clone https://github.com/romarcg/project_assignment.git
 catkin build
 ```
 
@@ -13,7 +13,7 @@ catkin build
 1. Bring up gazebo and the MyT's model. You must name your simulated MyT with the `name` parameter, e.g. `thymio10`. In addition you must indicate a `world` to simulate:
 
 ```
-roslaunch thymio_course_skeleton thymio_gazebo_bringup.launch name:=thymio10 world:=empty
+roslaunch project_assignment thymio_gazebo_bringup.launch name:=thymio10 world:=empty
 ```
 
 Examples of world definitions are stored in `.world` files in `launch/worlds/`. Two worlds are included, one `empty` with a large plane and another with a large plane and a `wall`.
@@ -24,7 +24,7 @@ Examples of world definitions are stored in `.world` files in `launch/worlds/`. 
 2. Visualize a full set of topics exposed by the simulated low-level MyT controller:
 
 ```
-roslaunch thymio_course_skeleton thymio_rviz.launch name:=thymio10
+roslaunch project_assignment thymio_rviz.launch name:=thymio10
 ```
 
 > All topic names from the simulated MyT have as prefix
@@ -40,5 +40,5 @@ Perform basic interfacing tasks:
 `basic_move.py` indefinitely performs the above tasks on a simulated MyT. It requires the MyT's name to interface with the correct topics.
 
 ```
-rosrun thymio_course_skeleton basic_move.py thymio10
+rosrun project_assignment basic_move.py thymio10
 ```

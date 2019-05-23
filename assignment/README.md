@@ -107,7 +107,7 @@ Refer to [MyT interface repository](https://github.com/jeguzzi/mighty-thymio/blo
 
 ### Install skeleton ROS package for the simulated MyT
 
-Download `thymio_course_skeleton` [package](https://github.com/romarcg/thymio_course_skeleton) for a first glance at how to interact with simulated MyT.
+Download `project_assignment` [package](https://github.com/romarcg/project_assignment) for a first glance at how to interact with simulated MyT.
 
 This package includes:
 1. Launch files to bring up gazebo simulator and MyT model.

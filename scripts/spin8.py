@@ -14,6 +14,7 @@ from std_srvs.srv import Empty
 # a handy tool to convert orientations
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
+
 class BasicThymio:
 
     def __init__(self, thymio_name):
@@ -43,11 +44,12 @@ class BasicThymio:
         try:
             model_state = ModelState()
             model_state.model_name = self.thymio_name
-            model_state.reference_frame = '' # the frame for the pose information
+            model_state.reference_frame = ''  # the frame for the pose information
             model_state.pose.position.x = position[0]
             model_state.pose.position.y = position[1]
             model_state.pose.position.z = position[2]
-            qto = quaternion_from_euler(orientation[0], orientation[0], orientation[0], axes='sxyz')
+            qto = quaternion_from_euler(
+                orientation[0], orientation[0], orientation[0], axes='sxyz')
             model_state.pose.orientation.x = qto[0]
             model_state.pose.orientation.y = qto[1]
             model_state.pose.orientation.z = qto[2]
@@ -57,7 +59,7 @@ class BasicThymio:
             response = gms(model_state)
             return response
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            print "Service call failed: %s" % e
 
     def update_state(self, data):
         """A new Odometry message has arrived. See Odometry msg definition."""
@@ -69,34 +71,33 @@ class BasicThymio:
             self.current_pose.orientation.y,
             self.current_pose.orientation.z,
             self.current_pose.orientation.w)
-        (roll, pitch, yaw) = euler_from_quaternion (quat)
-        rospy.loginfo("State from Odom: (%.5f, %.5f, %.5f) " % (self.current_pose.position.x, self.current_pose.position.y, yaw))
+        (roll, pitch, yaw) = euler_from_quaternion(quat)
+        rospy.loginfo("State from Odom: (%.5f, %.5f, %.5f) " % (
+            self.current_pose.position.x, self.current_pose.position.y, yaw))
 
-    def basic_move(self):
+    def spin_8(self):
         """Moves the migthy thymio"""
         vel_msg = Twist()
-        vel_msg.linear.x = 0.2 # m/s
-        vel_msg.angular.z = 0. # rad/s
-
+        vel_msg.linear.x = 0.2  # m/s
+        vel_msg.angular.z = 0.6  # rad/s
+        change = False
         while not rospy.is_shutdown():
-            # Publishing thymo vel_msg
+            if (abs(self.current_pose.position.x) < 0.01) and (abs(self.current_pose.position.y) < 0.01) and not change:
+                change = True
+                vel_msg.angular.z = vel_msg.angular.z * -1
+            else:
+                change = False
             self.velocity_publisher.publish(vel_msg)
-            # .. at the desired rate.
             self.rate.sleep()
-
-        # Stop thymio. With is_shutdown condition we do not reach this point.
-        #vel_msg.linear.x = 0.
-        #vel_msg.angular.z = 0.
-        #self.velocity_publisher.publish(vel_msg)
-
-        # waiting until shutdown flag (e.g. ctrl+c)
         rospy.spin()
+
 
 def usage():
     return "Wrong number of parameters. basic_move.py [thymio_name]"
 
+
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         thymio_name = sys.argv[1]
         print "Now working with robot: %s" % thymio_name
     else:
@@ -110,8 +111,8 @@ if __name__ == '__main__':
     # NOTE: The goal of this step is *only* to show the available
     # tools. The launch file process should take care of initializing
     # the simulation and spawning the respective models
-    
-    #thymio.thymio_state_service_request([0.,0.,0.], [0.,0.,0.])
-    #rospy.sleep(1.)
 
-    thymio.basic_move()
+    #thymio.thymio_state_service_request([0.,0.,0.], [0.,0.,0.])
+    # rospy.sleep(1.)
+
+    thymio.spin_8()
