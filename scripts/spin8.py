@@ -13,6 +13,7 @@ from gazebo_msgs.srv import SetModelState
 from matplotlib import pyplot as plt
 from std_srvs.srv import Empty
 import cv2
+import time
 
 # a handy tool to convert orientations
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
@@ -24,7 +25,7 @@ class BasicThymio:
         """init"""
         self.thymio_name = thymio_name
         rospy.init_node('basic_thymio_controller', anonymous=True)
-
+        time.sleep(2)
         # Publish to the topic '/thymioX/cmd_vel'.
         self.velocity_publisher = rospy.Publisher(self.thymio_name + '/cmd_vel',
                                                   Twist, queue_size=10)
@@ -34,8 +35,8 @@ class BasicThymio:
         self.pose_subscriber = rospy.Subscriber(self.thymio_name + '/odom',
                                                 Odometry, self.update_state)
 
-        self.pose_subscriber = rospy.Subscriber(self.thymio_name + '/camera/image_raw',
-                                                Image, self.update_image)
+        self.camera_subscriber = rospy.Subscriber(self.thymio_name + '/camera/image_raw',
+                                                  Image, self.update_image)
 
         self.current_pose = Pose()
         self.current_twist = Twist()
@@ -91,7 +92,7 @@ class BasicThymio:
         cv2.imshow("Image", pixels)
         if cv2.waitKey(1) == 27:  # esc to quit
             cv2.destroyAllWindows()
-            sys.exit(1)
+            # self.rate.sleep()
 
         # plt.draw()
 
@@ -132,9 +133,15 @@ if __name__ == '__main__':
     # tools. The launch file process should take care of initializing
     # the simulation and spawning the respective models
 
-    #thymio.thymio_state_service_request([0.,0.,0.], [0.,0.,0.])
+    # thymio.thymio_state_service_request([0.,0.,0.], [0.,0.,0.])
     # rospy.sleep(1.)
     # plt.ion()
     # plt.show()
     # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    thymio.spin_8()
+    # thymio.spin_8()
+
+    thymio.rate.sleep()
+
+    thymio.thymio_state_service_request([3., 3., 0.], [np.pi, 0., 0., 0.])
+
+    rospy.spin()
