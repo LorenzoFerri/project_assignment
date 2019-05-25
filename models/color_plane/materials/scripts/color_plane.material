@@ -10,7 +10,7 @@ material ColorPlane/Image
 
               texture_unit
               {
-                texture color_jigsaw.png
+                texture line.png
               }
             }
           }

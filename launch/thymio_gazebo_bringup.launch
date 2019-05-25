@@ -4,8 +4,9 @@
   <env name="GAZEBO_MODEL_PATH" value="$(find thymio_description)/..:$(find thymioid_description)/..:$(find project_assignment)/models:$(optenv GAZEBO_MODEL_PATH)" />
   <env name="SVGA_VGPU10" value="0"/>
   <arg name="gui" default="true"/>
-  <arg name="name" default=""/>
-  <arg name="world" default="empty"/>
+  <arg name="name" default="thymio10"/>
+  <arg name="world" default="color_plane"/>
+  <arg name="script" default="create_dataset.py"/>
   <!-- <env name="GAZEBO_MODEL_PATH" value="$GAZEBO_MODEL_PATH:$(find project_assignment)/models" /> -->
   <env name="GAZEBO_RESOURCE_PATH" value="$GAZEBO_RESOURCE_PATH:$(find project_assignment)/models" />
 
@@ -31,12 +32,12 @@
     <arg name="right_wheel_friction" value="1"/>
 
     <arg name="camera_is_fixed" default="false"/>
-    <arg name="camera_pitch" default="0.2618"/>
+    <arg name="camera_pitch" default="0.3"/>
 
     <arg name="proximity_max_range" default="0.12"/>
     <arg name="proximity_resolution" default="0.005"/>
     <arg name="proximity_fov" default="0.3"/>
   </include>
 
-  <node name="project_assignment" pkg="project_assignment" type="spin8.py" required="true" args="$(arg name)" output="screen"/>
+  <!-- <node name="project_assignment" pkg="project_assignment" type="$(arg script)" required="true" args="$(arg name)" output="screen"/> -->
 </launch>

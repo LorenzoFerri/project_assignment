@@ -12,6 +12,7 @@ from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
 from matplotlib import pyplot as plt
 from std_srvs.srv import Empty
+from dynamic_reconfigure.msg import ConfigDescription
 import cv2
 import time
 
@@ -26,22 +27,19 @@ class BasicThymio:
         self.thymio_name = thymio_name
         rospy.init_node('basic_thymio_controller', anonymous=True)
         time.sleep(2)
-        # Publish to the topic '/thymioX/cmd_vel'.
         self.velocity_publisher = rospy.Publisher(self.thymio_name + '/cmd_vel',
                                                   Twist, queue_size=10)
-
-        # A subscriber to the topic '/turtle1/pose'. self.update_pose is called
-        # when a message of type Pose is received.
         self.pose_subscriber = rospy.Subscriber(self.thymio_name + '/odom',
                                                 Odometry, self.update_state)
-
         self.camera_subscriber = rospy.Subscriber(self.thymio_name + '/camera/image_raw',
-                                                  Image, self.update_image)
+                                                  Image, self.update_image, queue_size=1)
 
+        self.camera_pitch_pub = rospy.Publisher(
+            self.thymio_name + '/camera_pitch_controller/parameter_descriptions', ConfigDescription, queue_size=1)
         self.current_pose = Pose()
         self.current_twist = Twist()
-        # publish at this rate
         self.rate = rospy.Rate(10)
+        self.pixels = None
 
     def thymio_state_service_request(self, position, orientation):
         """Request the service (set thymio state values) exposed by
@@ -56,12 +54,11 @@ class BasicThymio:
             model_state.pose.position.y = position[1]
             model_state.pose.position.z = position[2]
             qto = quaternion_from_euler(
-                orientation[0], orientation[0], orientation[0], axes='sxyz')
+                orientation[0], orientation[1], orientation[2], axes='sxyz')
             model_state.pose.orientation.x = qto[0]
             model_state.pose.orientation.y = qto[1]
             model_state.pose.orientation.z = qto[2]
             model_state.pose.orientation.w = qto[3]
-            # a Twist can also be set but not recomended to do it in a service
             gms = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
             response = gms(model_state)
             return response
@@ -70,46 +67,19 @@ class BasicThymio:
 
     def update_state(self, data):
         """A new Odometry message has arrived. See Odometry msg definition."""
-        # Note: Odmetry message also provides covariance
         self.current_pose = data.pose.pose
         self.current_twist = data.twist.twist
-        quat = (
-            self.current_pose.orientation.x,
-            self.current_pose.orientation.y,
-            self.current_pose.orientation.z,
-            self.current_pose.orientation.w)
-        (roll, pitch, yaw) = euler_from_quaternion(quat)
-        # rospy.loginfo("State from Odom: (%.5f, %.5f, %.5f) " % (
-        #     self.current_pose.position.x, self.current_pose.position.y, yaw))
 
     def update_image(self, img):
         """A new Odometry message has arrived. See Odometry msg definition."""
-        # data_msg = rospy.wait_for_message('/camera/image_raw', Image)
-        # format_msg = rospy.wait_for_message('camera/camera_info', sensor_msgs.msg.CameraInfo)
-        # print(img)
-        pixels = np.fromstring(img.data, dtype=np.dtype(
+        self.pixels = np.fromstring(img.data, dtype=np.dtype(
             np.uint8)).reshape(480, 640, 3)
-        cv2.imshow("Image", pixels)
-        cv2.waitKey(1)
-        # self.rate.sleep()
 
-        # plt.draw()
-
-    def spin_8(self):
-        """Moves the migthy thymio"""
-        vel_msg = Twist()
-        vel_msg.linear.x = 0.2  # m/s
-        vel_msg.angular.z = 0.6  # rad/s
-        change = False
-        while not rospy.is_shutdown():
-            if (abs(self.current_pose.position.x) < 0.01) and (abs(self.current_pose.position.y) < 0.01) and not change:
-                change = True
-                vel_msg.angular.z = vel_msg.angular.z * -1
-            else:
-                change = False
-            self.velocity_publisher.publish(vel_msg)
-            self.rate.sleep()
-        rospy.spin()
+    def sensor_discovery(self):
+        for _topic, _type in rospy.get_published_topics():
+            print _topic, _type
+        # while(np.array_equal(current_pixels, self.pixels)):
+        #     print('a')
 
 
 def usage():
@@ -125,31 +95,45 @@ if __name__ == '__main__':
         sys.exit(1)
     thymio = BasicThymio(thymio_name)
 
-    # Teleport the robot to a certain pose. If pose is different to the
-    # origin of the world, you must account for a transformation between
-    # odom and gazebo world frames.
-    # NOTE: The goal of this step is *only* to show the available
-    # tools. The launch file process should take care of initializing
-    # the simulation and spawning the respective models
-
-    # thymio.thymio_state_service_request([0.,0.,0.], [0.,0.,0.])
-    # rospy.sleep(1.)
-    # plt.ion()
-    # plt.show()
-    # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    thymio.spin_8()
-
-    # thy
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    # mio.rate.sleep()
-
     # thymio.thymio_state_service_request([3., 3., 0.], [0, 1, 0, 0])
+    save_flag = False
+    start = False
+    distance = 0.5
+    angle = -np.pi/3
+    while distance <= 5:
+        if thymio.pixels is not None:
+            cv2.imshow("Image", thymio.pixels)
+            if save_flag:
+                cv2.imwrite(
+                    '../dataset/image_'+str(distance)+'_'+str(angle)+'.png', thymio.pixels)
+                save_flag = False
+                start = True
+                angle += 0.1
+                if angle > np.pi/3:
+                    angle = -np.pi/3
+                    distance += 0.1
+                    print distance
+            thymio.pixels = None
 
-    rospy.spin()
+        p = cv2.waitKey(1)
+
+        if p == 27:  # esc to quit
+            thymio.sensor_discovery()
+
+        if p == ord(' '):
+            start = True
+
+        if p == ord('a'):
+            msg = ConfigDescription()
+            print msg.min
+            # msg.doubles[1] = 0.3
+            # thymio.camera_pitch_pub.publish(msg)
+
+        if start:
+            start = False
+            thymio.thymio_state_service_request(
+                [0., distance, 0.], [0, 0, (-np.pi/2) + angle])
+            thymio.pixels = None
+            save_flag = True
+
+        thymio.rate.sleep()
