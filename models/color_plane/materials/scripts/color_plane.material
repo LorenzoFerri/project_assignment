@@ -10,7 +10,7 @@ material ColorPlane/Image
 
               texture_unit
               {
-                texture line.png
+                texture new_line.png
               }
             }
           }

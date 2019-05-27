@@ -12,7 +12,8 @@ from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
 from matplotlib import pyplot as plt
 from std_srvs.srv import Empty
-from dynamic_reconfigure.msg import ConfigDescription
+from dynamic_reconfigure.msg import Config
+from dynamic_reconfigure.parameter_generator import *
 import cv2
 import time
 
@@ -35,7 +36,7 @@ class BasicThymio:
                                                   Image, self.update_image, queue_size=1)
 
         self.camera_pitch_pub = rospy.Publisher(
-            self.thymio_name + '/camera_pitch_controller/parameter_descriptions', ConfigDescription, queue_size=1)
+            self.thymio_name + '/camera_pitch_controller/parameter_updates', Config, queue_size=1)
         self.current_pose = Pose()
         self.current_twist = Twist()
         self.rate = rospy.Rate(10)
@@ -98,9 +99,9 @@ if __name__ == '__main__':
     # thymio.thymio_state_service_request([3., 3., 0.], [0, 1, 0, 0])
     save_flag = False
     start = False
-    distance = 0.5
+    distance = 0.25
     angle = -np.pi/3
-    while distance <= 5:
+    while distance <= 1.5:
         if thymio.pixels is not None:
             cv2.imshow("Image", thymio.pixels)
             if save_flag:
@@ -108,10 +109,10 @@ if __name__ == '__main__':
                     '../dataset/image_'+str(distance)+'_'+str(angle)+'.png', thymio.pixels)
                 save_flag = False
                 start = True
-                angle += 0.1
+                angle += 0.02
                 if angle > np.pi/3:
                     angle = -np.pi/3
-                    distance += 0.1
+                    distance += 0.02
                     print distance
             thymio.pixels = None
 
@@ -123,16 +124,12 @@ if __name__ == '__main__':
         if p == ord(' '):
             start = True
 
-        if p == ord('a'):
-            msg = ConfigDescription()
-            print msg.min
-            # msg.doubles[1] = 0.3
-            # thymio.camera_pitch_pub.publish(msg)
+        # if p == ord('a'):
 
         if start:
             start = False
             thymio.thymio_state_service_request(
-                [0., distance, 0.], [0, 0, (-np.pi/2) + angle])
+                [0., distance, 0.], [0, 0, (-np.pi/2)+angle])
             thymio.pixels = None
             save_flag = True
 
