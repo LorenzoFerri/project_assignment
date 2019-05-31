@@ -24,6 +24,8 @@ Now you can test the estimator running
 
     roslaunch project_assignment thymio_gazebo_bringup.launch
     ./move.py thymio10
+    
+After launching press `t` to teleport the thymio to a known position.
 
 Move using the keys:
 
@@ -34,3 +36,5 @@ Move using the keys:
     a = turn left
     d = turn right
     e = stop turning
+    
+    t = teleport thymio to 0,   0.25,  0
