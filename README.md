@@ -1,44 +1,24 @@
-## Skeleton files to bring up gazebo and the Mighty Thymio model
+## Lorenzo Ferri, Marco Nobile
 
-Add the `project_assignment` package to your `your_catkin_workspace`:
+# Distance and angle estimator with Mighty Thymio
 
-```
-cd <your_catkin_workspace>/src
-git clone https://github.com/romarcg/project_assignment.git
-catkin build
-```
+In order to run you have first to train the cnn, we didn't push it to git since the file was over 500 MB.
 
-### Refer to the launch files in `launch` folder to:
+To train the cnn you first need to generate the dataset. to do so launch gazebo with:
 
-1. Bring up gazebo and the MyT's model. You must name your simulated MyT with the `name` parameter, e.g. `thymio10`. In addition you must indicate a `world` to simulate:
+    roslaunch project_assignment thymio_gazebo_bringup.launch
 
-```
-roslaunch project_assignment thymio_gazebo_bringup.launch name:=thymio10 world:=empty
-```
+Then call the script from inside the scripts folder:
 
-Examples of world definitions are stored in `.world` files in `launch/worlds/`. Two worlds are included, one `empty` with a large plane and another with a large plane and a `wall`.
+    ./create_dataset.py
 
-> If you want to modify the MyT's `spawing` pose, explore `thymio_gazebo_bringup.launch` file.
+Now you can train the cnn running from the scripts folder:
 
+    python3 main.py train
 
-2. Visualize a full set of topics exposed by the simulated low-level MyT controller:
+This will take a while. On a GTX 1070 it took around 30 min.
 
-```
-roslaunch project_assignment thymio_rviz.launch name:=thymio10
-```
+Now you can test the estimator running
 
-> All topic names from the simulated MyT have as prefix
-> the chosen name, e.g. `/thymio10/odom`
-
-
-### Refer to the skeleton rospy node to:
-
-Perform basic interfacing tasks:
-* A simple controller that sets constant velocities by publishing `cmd_vel` messages.
-* A subscriber that receives odometry information from simulation.
-
-`basic_move.py` indefinitely performs the above tasks on a simulated MyT. It requires the MyT's name to interface with the correct topics.
-
-```
-rosrun project_assignment basic_move.py thymio10
-```
+    roslaunch project_assignment thymio_gazebo_bringup.launch
+    ./move.py
