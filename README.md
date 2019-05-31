@@ -10,7 +10,7 @@ To train the cnn you first need to generate the dataset. to do so launch gazebo 
 
 Then call the script from inside the scripts folder:
 
-    ./create_dataset.py
+    ./create_dataset.py thymio10
 
 Then press space to start generating the dataset.
 
@@ -23,7 +23,7 @@ This will take a while. On a GTX 1070 it took around 30 min.
 Now you can test the estimator running
 
     roslaunch project_assignment thymio_gazebo_bringup.launch
-    ./move.py
+    ./move.py thymio10
 
 Move using the keys:
 
