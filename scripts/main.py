@@ -20,10 +20,10 @@ if len(sys.argv) <= 1:
     print('Usage: python3 main.py (train|test)')
     sys.exit(0)
 
-test_split = .3
+test_split = 0
 shuffle_dataset = True
 random_seed = 42
-batch_size = 32
+batch_size = 16
 dataset = ImageDataset(root_dir="./dataset")
 dataset_size = len(dataset)
 indices = list(range(dataset_size))

@@ -12,6 +12,8 @@ Then call the script from inside the scripts folder:
 
     ./create_dataset.py
 
+Then press space to start generating the dataset.
+
 Now you can train the cnn running from the scripts folder:
 
     python3 main.py train
@@ -22,3 +24,13 @@ Now you can test the estimator running
 
     roslaunch project_assignment thymio_gazebo_bringup.launch
     ./move.py
+
+Move using the keys:
+
+    w = move forward
+    x = move backward
+    s = stop moving
+
+    a = turn left
+    d = turn right
+    e = stop turning
